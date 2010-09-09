@@ -3,11 +3,6 @@
 (defmulti to-java (fn [destination-type value] [destination-type (class value)]))
 (defmulti from-java class)
 
-;(derive Boolean :primitive)
-;(derive Integer :primitive)
-;(derive String :primitive)
-
-
 (defn- get-property-descriptors [clazz]
   (.getPropertyDescriptors (java.beans.Introspector/getBeanInfo clazz)))
 
@@ -59,9 +54,22 @@
 (defmethod to-java :default [_ value] value)
 
 
-;(defmethod from-java )
+(doseq [clazz [String Character Byte Short Integer Long Float Double Boolean]]
+  (derive clazz ::reference-type))
+
+(defmethod from-java ::reference-type [value] value)
+
+(defmethod from-java Iterable [instance]
+    (for [each (seq instance)] (from-java each)))
 
 (defmethod from-java Object [instance]
-     (let [clazz (.getClass instance)
+    (let [clazz (.getClass instance)
            getter-map (reduce add-getter-fn {} (get-property-descriptors clazz))]
        (reduce add-getter-fn {} (get-property-descriptors clazz))))
+
+(defmethod from-java java.util.Map [instance]
+    (into {} instance))
+
+(prefer-method from-java java.util.Map Iterable)
+(prefer-method from-java Iterable Object)
+(prefer-method from-java ::reference-type Object)
