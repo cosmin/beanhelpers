@@ -21,7 +21,7 @@
 
 (defn- make-setter-fn [method]
     (fn [instance value]
-      (.invoke method instance (into-array [(to-java value (get-setter-type method))]))))
+      (.invoke method instance (into-array [(to-java (get-setter-type method) value)]))))
 
 (defn- add-getter-fn [the-map prop-descriptor]
   (let [name (.getName prop-descriptor)
