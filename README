@@ -1,1 +1,8 @@
 Helpers for dealing with Java beans in Clojure
+
+Example:
+
+(require 'offbytwo.beanhelpers)
+
+(beanhelpers/to-java YourJavaClass clojure-propert-map)
+(beanhelpers/from-java javaValue)
