@@ -17,7 +17,7 @@
 
 (defn- make-getter-fn [method]
   (fn [instance]
-    (.invoke method instance nil)))
+    (from-java (.invoke method instance nil))))
 
 (defn- make-setter-fn [method]
     (fn [instance value]
@@ -26,9 +26,9 @@
 (defn- add-getter-fn [the-map prop-descriptor]
   (let [name (.getName prop-descriptor)
         method (.getReadMethod prop-descriptor)]
-    (if (is-getter method)
-      (assoc the-map (keyword name) (make-getter-fn method)))))
-
+    (if (and (is-getter method) (not (= "class" name)))
+      (assoc the-map (keyword name) (make-getter-fn method))
+      the-map)))
 
 (defn- add-setter-fn [the-map prop-descriptor]
   (let [name (.getName prop-descriptor)
@@ -36,7 +36,6 @@
     (if (is-setter method)
       (assoc the-map (keyword name) (make-setter-fn method))
       the-map)))
-
 
 (defmethod to-java [Enum String] [enum value]
   (.invoke (.getDeclaredMethod enum "valueOf" (into-array [String])) nil (into-array [value])))
@@ -53,22 +52,19 @@
 
 (defmethod to-java :default [_ value] value)
 
-
 (doseq [clazz [String Character Byte Short Integer Long Float Double Boolean]]
   (derive clazz ::reference-type))
 
 (defmethod from-java ::reference-type [value] value)
-
-(defmethod from-java Iterable [instance]
-    (for [each (seq instance)] (from-java each)))
+(defmethod from-java Iterable [instance] (for [each (seq instance)] (from-java each)))
+(defmethod from-java java.util.Map [instance] (into {} instance))
+(defmethod from-java nil [_] nil)
+(defmethod from-java Enum [enum] (str enum))
 
 (defmethod from-java Object [instance]
     (let [clazz (.getClass instance)
-           getter-map (reduce add-getter-fn {} (get-property-descriptors clazz))]
-       (reduce add-getter-fn {} (get-property-descriptors clazz))))
-
-(defmethod from-java java.util.Map [instance]
-    (into {} instance))
+          getter-map (reduce add-getter-fn {} (get-property-descriptors clazz))]
+      (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)]))))
 
 (prefer-method from-java java.util.Map Iterable)
 (prefer-method from-java Iterable Object)
