@@ -52,10 +52,10 @@
 
 (defmethod to-java :default [_ value] value)
 
-(doseq [clazz [String Character Byte Short Integer Long Float Double Boolean]]
-  (derive clazz ::reference-type))
+(doseq [clazz [String Character Byte Short Integer Long Float Double Boolean BigInteger BigDecimal]]
+  (derive clazz ::do-not-convert))
 
-(defmethod from-java ::reference-type [value] value)
+(defmethod from-java ::do-not-convert [value] value)
 (defmethod from-java Iterable [instance] (for [each (seq instance)] (from-java each)))
 (defmethod from-java java.util.Map [instance] (into {} instance))
 (defmethod from-java nil [_] nil)
@@ -87,4 +87,4 @@
 
 (prefer-method from-java java.util.Map Iterable)
 (prefer-method from-java Iterable Object)
-(prefer-method from-java ::reference-type Object)
+(prefer-method from-java ::do-not-convert Object)
