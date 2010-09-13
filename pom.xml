@@ -9,6 +9,15 @@
 
     <name>Bean Helpers</name>
     <url>http://github.com/offbytwo/beanhelpers</url>
+    <description>Utilities for working with Java beans from Clojure, particularly helpful from the REPL</description>
+
+    <licenses>
+      <license>
+        <name>Eclipse Public License 1.0</name>
+        <url>http://opensource.org/licenses/eclipse-1.0.php</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -141,4 +150,14 @@
             <url>http://clojars.org/repo</url>
         </repository>
     </repositories>
+    <distributionManagement>
+      <repository>
+        <id>offbytwo</id>
+        <url>http://github.com/offbytwo/repo/raw/master/releases</url>
+      </repository>
+      <snapshotRepository>
+        <id>snapshot-offbytwo</id>
+        <url>http://github.com/offbytwo/repo/raw/master/snapshots</url>
+      </snapshotRepository>
+    </distributionManagement>
 </project>
