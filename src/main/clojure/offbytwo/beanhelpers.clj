@@ -62,9 +62,28 @@
 (defmethod from-java Enum [enum] (str enum))
 
 (defmethod from-java Object [instance]
+  (try
     (let [clazz (.getClass instance)
           getter-map (reduce add-getter-fn {} (get-property-descriptors clazz))]
-      (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)]))))
+      (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)])))
+    (catch Exception e (println "Error trying to convert " instance e))))
+
+(defmethod from-java javax.xml.datatype.XMLGregorianCalendar [obj]
+           (let [date {:year (.getYear obj)
+                       :month (.getMonth obj)
+                       :day (.getDay obj)}
+                 time {:hour (.getHour obj)
+                       :minute (.getMinute obj)
+                       :second (.getSecond obj)}
+                 tz {:timezone (.getTimezone obj)}
+                 is-undefined? #(= javax.xml.datatype.DatatypeConstants/FIELD_UNDEFINED %1)]
+             (conj {}
+                   (if-not (is-undefined? (:year date))
+                     date)
+                   (if-not (is-undefined? (:hour time))
+                     time)
+                   (if-not (is-undefined? (:timezone tz))
+                     tz))))
 
 (prefer-method from-java java.util.Map Iterable)
 (prefer-method from-java Iterable Object)
