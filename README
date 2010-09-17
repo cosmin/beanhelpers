@@ -12,6 +12,7 @@ Helpers for dealing with Java beans in Clojure
 Example:
 
 (require 'offbytwo.beanhelpers)
+(require 'offbytwo.beanhelpers.xml) ; if you are converting to from XML data types, like XMLGregorianCalendar
 
 (beanhelpers/to-java YourJavaClass clojure-propert-map)
 (beanhelpers/from-java javaValue)

@@ -1,27 +1,20 @@
 (ns offbytwo.beanhelpers)
 
 (defmulti to-java (fn [destination-type value] [destination-type (class value)]))
+(defmethod to-java :default [_ value] value)
 (defmulti from-java class)
 
 (defn- get-property-descriptors [clazz]
   (.getPropertyDescriptors (java.beans.Introspector/getBeanInfo clazz)))
 
+;; getters
+
 (defn- is-getter [method]
   (and method (= 0 (alength (. method (getParameterTypes))))))
-
-(defn- is-setter [method]
-  (and method (= 1 (alength (. method (getParameterTypes))))))
-
-(defn- get-setter-type [method]
-  (get (.getParameterTypes method) 0))
 
 (defn- make-getter-fn [method]
   (fn [instance]
     (from-java (.invoke method instance nil))))
-
-(defn- make-setter-fn [method]
-    (fn [instance value]
-      (.invoke method instance (into-array [(to-java (get-setter-type method) value)]))))
 
 (defn- add-getter-fn [the-map prop-descriptor]
   (let [name (.getName prop-descriptor)
@@ -30,12 +23,26 @@
       (assoc the-map (keyword name) (make-getter-fn method))
       the-map)))
 
+;; setters
+
+(defn- is-setter [method]
+  (and method (= 1 (alength (. method (getParameterTypes))))))
+
+(defn- get-setter-type [method]
+  (get (.getParameterTypes method) 0))
+
+(defn- make-setter-fn [method]
+    (fn [instance value]
+      (.invoke method instance (into-array [(to-java (get-setter-type method) value)]))))
+
 (defn- add-setter-fn [the-map prop-descriptor]
   (let [name (.getName prop-descriptor)
         method (.getWriteMethod prop-descriptor)]
     (if (is-setter method)
       (assoc the-map (keyword name) (make-setter-fn method))
       the-map)))
+
+;; to java
 
 (defmethod to-java [Enum String] [enum value]
   (.invoke (.getDeclaredMethod enum "valueOf" (into-array [String])) nil (into-array [value])))
@@ -50,16 +57,7 @@
           (apply setter [instance value]))))
     instance))
 
-(defmethod to-java :default [_ value] value)
-
-(doseq [clazz [String Character Byte Short Integer Long Float Double Boolean BigInteger BigDecimal]]
-  (derive clazz ::do-not-convert))
-
-(defmethod from-java ::do-not-convert [value] value)
-(defmethod from-java Iterable [instance] (for [each (seq instance)] (from-java each)))
-(defmethod from-java java.util.Map [instance] (into {} instance))
-(defmethod from-java nil [_] nil)
-(defmethod from-java Enum [enum] (str enum))
+;; from java
 
 (defmethod from-java Object [instance]
   (try
@@ -68,23 +66,14 @@
       (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)])))
     (catch Exception e (println "Error trying to convert " instance e))))
 
-(defmethod from-java javax.xml.datatype.XMLGregorianCalendar [obj]
-           (let [date {:year (.getYear obj)
-                       :month (.getMonth obj)
-                       :day (.getDay obj)}
-                 time {:hour (.getHour obj)
-                       :minute (.getMinute obj)
-                       :second (.getSecond obj)}
-                 tz {:timezone (.getTimezone obj)}
-                 is-undefined? #(= javax.xml.datatype.DatatypeConstants/FIELD_UNDEFINED %1)]
-             (conj {}
-                   (if-not (is-undefined? (:year date))
-                     date)
-                   (if-not (is-undefined? (:hour time))
-                     time)
-                   (if-not (is-undefined? (:timezone tz))
-                     tz))))
+(doseq [clazz [String Character Byte Short Integer Long Float Double Boolean BigInteger BigDecimal]]
+  (derive clazz ::do-not-convert))
 
-(prefer-method from-java java.util.Map Iterable)
-(prefer-method from-java Iterable Object)
+(defmethod from-java ::do-not-convert [value] value)
 (prefer-method from-java ::do-not-convert Object)
+(defmethod from-java Iterable [instance] (for [each (seq instance)] (from-java each)))
+(prefer-method from-java Iterable Object)
+(defmethod from-java java.util.Map [instance] (into {} instance))
+(prefer-method from-java java.util.Map Iterable)
+(defmethod from-java nil [_] nil)
+(defmethod from-java Enum [enum] (str enum))
