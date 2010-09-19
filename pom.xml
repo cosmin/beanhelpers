@@ -19,6 +19,12 @@
       </license>
     </licenses>
 
+    <scm>
+      <connection>scm:git:ssh://git@github.com/offbytwo/beanhelpers.git</connection>
+      <url>scm:git:ssh://git@github.com/offbytwo/beanhelpers.git</url>
+      <developerConnection>scm:git:ssh://git@github.com/offbytwo/beanhelpers.git</developerConnection>
+    </scm>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <clojure.version>1.2.0</clojure.version>
@@ -152,11 +158,11 @@
     </repositories>
     <distributionManagement>
       <repository>
-        <id>offbytwo</id>
+        <id>offbytwo-releases</id>
         <url>http://github.com/offbytwo/repo/raw/master/releases</url>
       </repository>
       <snapshotRepository>
-        <id>snapshot-offbytwo</id>
+        <id>offbytwo-snapshots</id>
         <url>http://github.com/offbytwo/repo/raw/master/snapshots</url>
       </snapshotRepository>
     </distributionManagement>
