@@ -3,7 +3,7 @@
 
     <groupId>com.offbytwo</groupId>
     <artifactId>beanhelpers</artifactId>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Bean Helpers</name>
