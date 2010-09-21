@@ -57,6 +57,8 @@
           (apply setter [instance value]))))
     instance))
 
+(defmethod to-java [BigInteger Integer] [_ value] (bigint value))
+
 ;; from java
 
 (defmethod from-java Object [instance]

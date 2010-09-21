@@ -19,7 +19,7 @@
 
 (deftest java-to-clojure
   (let [address (new Address "123 Main St" "Dallas" State/TX "75432")
-        person (from-java (Person. "Bob" 30 address))]
+        person (from-java (Person. "Bob" (bigint 30) address))]
     (is (= "Bob" (:name person)))
     (is (= 30 (:age person)))
     (is (= "123 Main St" (:line1 (:address person))))
