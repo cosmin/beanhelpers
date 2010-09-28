@@ -1,6 +1,6 @@
 package offbytwo.beanhelpers.test;
 
-import java.math.BigInteger
+import java.math.BigInteger;
 
 public class Person {
 	private String name;
